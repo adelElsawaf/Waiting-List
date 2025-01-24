@@ -29,6 +29,7 @@ export class AuthController {
      */
     @Post('register')
     async register(@Body() userRegisterRequest: UserRegisterRequest) {
+        console.log(userRegisterRequest)
         return await this.authService.localRegister(userRegisterRequest);
     }
 

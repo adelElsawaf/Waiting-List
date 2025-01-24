@@ -13,12 +13,16 @@ async function bootstrap() {
     }),
   );
   app.enableCors({
-    origin: 'http://localhost:3000',
+    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Accept', 'Authorization'],
   });
   app.use(cookieParser());
-  await app.listen(3001);
+  const port = process.env.PORT || 3001;
+  await app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+  });
+
 }
 bootstrap();

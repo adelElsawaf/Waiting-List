@@ -11,6 +11,7 @@ import { UserEntity } from './user/user.entity';
 @Module({
   imports: [
     ConfigModule.forRoot({
+      envFilePath: process.env.NODE_ENV === 'production' ? '.env.production' : '.env.local',
       isGlobal: true,
     }),
     TypeOrmModule.forRootAsync({

@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, UnauthorizedException, UnprocessableEntityException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { UserRegisterRequest } from './request/UserRegisterRequest';
@@ -9,7 +9,8 @@ import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class AuthService {
-    constructor(private userService: UserService,
+    constructor(@Inject(forwardRef(() => UserService)) // Use forwardRef to inject UserService
+    private readonly userService: UserService,
         private jwtService: JwtService
     ) { }
     /**
@@ -112,6 +113,11 @@ export class AuthService {
  */
     async isPasswordMatch(providedPassword: string, storedPassword: string): Promise<boolean> {
         return bcrypt.compareSync(providedPassword, storedPassword);
+    }
+
+    async verifyToken(token: string) {
+        const decoded = this.jwtService.verify(token);
+        return this.userService.findByEmail(decoded.email);
     }
 
 

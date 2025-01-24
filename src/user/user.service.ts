@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common'; 
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -8,6 +8,7 @@ import { UserAlreadyExistException } from './exception/UserAlreadyExistException
 import { UserNotFoundException } from './exception/UserNotFoundException';
 import { FindUserResponse } from './response/FindUserResponse';
 import { User } from './response/User';
+import { AuthService } from 'src/auth/auth.service';
 
 @Injectable()
 export class UserService {
@@ -19,7 +20,11 @@ export class UserService {
     constructor(
         @InjectRepository(UserEntity)
         private readonly userRepository: Repository<UserEntity>,
+
+        @Inject(forwardRef(() => AuthService)) // Use forwardRef to avoid circular dependency
+        private readonly authService: AuthService,
     ) { }
+
 
     /**
      * Creates a local user.
@@ -40,9 +45,7 @@ export class UserService {
         * Check first if user exist before adding it
         */
         const existingUser = await this.findByEmailSafe(email) // Avoid exception if user not found
-        console.log(existingUser)
         if (existingUser) {
-            console.log("exception")
             throw new UserAlreadyExistException(`User with email ${email} already exists`);
         }
         else {
@@ -171,8 +174,12 @@ export class UserService {
             lastName: userAsEntity.lastName,
             googleId: userAsEntity.googleId
         }
-        console.log(user)
         return user
     }
+
+    async getUserFromToken(token: string): Promise<FindUserResponse> {
+       return this.authService.verifyToken(token);
+    }
+
 
 }

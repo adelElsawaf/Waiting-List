@@ -1,4 +1,5 @@
 import { IsEmail, IsNotEmpty, IsOptional, IsString, MaxLength, MinLength, ValidateIf } from "class-validator";
+import { IsNull } from "typeorm";
 
 export class UserRegisterRequest {
     @IsEmail({}, { message: 'Please provide a valid email address' })

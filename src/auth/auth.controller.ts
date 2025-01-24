@@ -1,8 +1,10 @@
-import { Controller, Post, Body, Get, Req, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Get, Req, UseGuards, Res } from '@nestjs/common';
+import { Response } from 'express';
 import { AuthService } from './auth.service';
 import { UserRegisterRequest } from './request/UserRegisterRequest'; // Assuming your DTO is in a `dto` folder
 import { GoogleAuthGuard } from './guards/google.guard';
 import { LoginRequest } from './request/LoginRequest';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
@@ -36,23 +38,44 @@ export class AuthController {
      */
     @Get('google')
     @UseGuards(GoogleAuthGuard)
-    async googleAuth() {
-        // This route initiates the Google OAuth process.
-        // Passport will redirect the user to Google's login page.
-    }
+    async googleAuth() { }
 
-
-    /**
-     * The route that Google redirects to after a successful authentication.
-     * This route will receive the user information from Google and create a JWT token.
-     * The JWT token will then be returned to the user.
-     * 
-     * @returns A promise that resolves to an object containing a JWT token if authentication is successful.
-     */
     @Get('google/redirect')
     @UseGuards(GoogleAuthGuard)
-    async googleAuthCallback(@Req() req) {
-        const user = req.user;
-        return this.authService.handleGoogleAuth(user);
+    async googleAuthRedirect(@Req() req, @Res() res: Response) {
+        try {
+            const { token } = await this.authService.handleGoogleAuth(req.user);
+
+            // Set HTTP-only cookie
+            res.cookie('authToken', token, {
+                httpOnly: false,
+                secure: true,
+                sameSite: 'lax',
+                maxAge: 24 * 60 * 60 * 1000 // 24 hours
+            });
+
+            // Redirect to frontend
+            res.redirect('http://localhost:3000/auth/callback');
+        } catch (error) {
+            res.redirect('http://localhost:3000/auth/error');
+        }
+    }
+
+    @Get('verify')
+    async verifyAuth(@Req() req, @Res() res: Response) {
+        try {
+            // Get token from cookie
+            const token = req.cookies['authToken'];
+
+            if (!token) {
+                return res.status(401).json({ message: 'No token found' });
+            }
+
+            // Verify token and get user data
+            const userData = await this.authService.verifyToken(token);
+            return res.json({ user: userData });
+        } catch (error) {
+            return res.status(401).json({ message: 'Invalid token' });
+        }
     }
 }

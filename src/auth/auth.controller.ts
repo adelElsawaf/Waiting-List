@@ -5,10 +5,13 @@ import { UserRegisterRequest } from './request/UserRegisterRequest'; // Assuming
 import { GoogleAuthGuard } from './guards/google.guard';
 import { LoginRequest } from './request/LoginRequest';
 import { AuthGuard } from '@nestjs/passport';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('auth')
 export class AuthController {
-    constructor(private readonly authService: AuthService) { }
+    constructor(private readonly authService: AuthService,
+        private readonly configService: ConfigService
+    ) { }
     /**
      * Logs in a user using their email and password.
      * @param loginRequest A LoginRequest object containing the email and password.
@@ -44,6 +47,8 @@ export class AuthController {
     @Get('google/redirect')
     @UseGuards(GoogleAuthGuard)
     async googleAuthRedirect(@Req() req, @Res() res: Response) {
+        const frontendUrl = this.configService.get<string>('FRONT_END_URL');
+        console.log(frontendUrl)
         try {
             const { token } = await this.authService.handleGoogleAuth(req.user);
 
@@ -56,9 +61,9 @@ export class AuthController {
             });
 
             // Redirect to frontend
-            res.redirect('http://localhost:3000/auth/callback');
+            res.redirect(frontendUrl + 'auth/callback');
         } catch (error) {
-            res.redirect('http://localhost:3000/auth/error');
+            res.redirect(frontendUrl+'auth/error');
         }
     }
 

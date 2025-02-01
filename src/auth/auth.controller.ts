@@ -59,6 +59,7 @@ export class AuthController {
                 sameSite: 'lax',
                 maxAge: 24 * 60 * 60 * 1000 // 24 hours
             });
+            console.log(res)
 
             // Redirect to frontend
             res.redirect(frontendUrl + 'auth/callback');

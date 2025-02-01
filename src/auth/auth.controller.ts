@@ -55,10 +55,11 @@ export class AuthController {
             console.log("after token")
             // Set HTTP-only cookie
             res.cookie('authToken', token, {
-                httpOnly: true,
+                httpOnly: false,
                 secure: process.env.NODE_ENV === 'production', // Set to true only in production
                 sameSite: 'none',
                 maxAge: 24 * 60 * 60 * 1000 // 24 hours
+                
             });
             console.log("after setting cookie")
             // Redirect to frontend

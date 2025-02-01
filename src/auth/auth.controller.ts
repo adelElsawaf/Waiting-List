@@ -57,7 +57,7 @@ export class AuthController {
             res.cookie('authToken', token, {
                 httpOnly: true,
                 secure: true,
-                sameSite: 'lax',
+                sameSite: 'none',
                 maxAge: 24 * 60 * 60 * 1000 // 24 hours
             });
             console.log("after setting cookie")

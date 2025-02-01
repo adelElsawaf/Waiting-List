@@ -56,18 +56,18 @@ export class AuthController {
             // Set HTTP-only cookie
             res.cookie('authToken', token, {
                 httpOnly: true,
-                secure: true,
+                secure: process.env.NODE_ENV === 'production', // Set to true only in production
                 sameSite: 'none',
                 maxAge: 24 * 60 * 60 * 1000 // 24 hours
             });
             console.log("after setting cookie")
             // Redirect to frontend
-            console.log(res.getHeader('set-cookie'));   
+            console.log(res.getHeader('set-cookie'));
             console.log("adel is here ")
             res.redirect(frontendUrl + '/auth/callback');
         } catch (error) {
             console.log("error is here")
-            res.redirect(frontendUrl+'/auth/error');
+            res.redirect(frontendUrl + '/auth/error');
         }
     }
 

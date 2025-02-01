@@ -18,11 +18,11 @@ async function bootstrap() {
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Accept', 'Authorization'],
   });
+  console.log(app.enableCors)
   app.use(cookieParser());
   const port = process.env.PORT || 3001;
   await app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
   });
-
 }
 bootstrap();

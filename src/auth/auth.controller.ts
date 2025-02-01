@@ -51,15 +51,16 @@ export class AuthController {
         console.log(frontendUrl)
         try {
             const { token } = await this.authService.handleGoogleAuth(req.user);
-
+            
             // Set HTTP-only cookie
             res.cookie('authToken', token, {
-                httpOnly: false,
+                httpOnly: true,
                 secure: true,
                 sameSite: 'lax',
                 maxAge: 24 * 60 * 60 * 1000 // 24 hours
             });
             // Redirect to frontend
+            console.log(res.cookie)
             res.redirect(frontendUrl + '/auth/callback');
         } catch (error) {
             res.redirect(frontendUrl+'/auth/error');

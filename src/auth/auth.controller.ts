@@ -56,8 +56,8 @@ export class AuthController {
             // Set HTTP-only cookie
             res.cookie('authToken', token, {
                 httpOnly: false,
-                secure: process.env.NODE_ENV === 'production', // Set to true only in production
-                sameSite: 'none',
+                secure: true, // Set to true only in production
+                sameSite: 'lax',
                 maxAge: 24 * 60 * 60 * 1000 // 24 hours
                 
             });

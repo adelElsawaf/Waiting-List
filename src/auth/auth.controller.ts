@@ -62,7 +62,7 @@ export class AuthController {
             });
             console.log("after setting cookie")
             // Redirect to frontend
-            console.log(res.cookie)
+            console.log(res.getHeader('set-cookie'));   
             console.log("adel is here ")
             res.redirect(frontendUrl + '/auth/callback');
         } catch (error) {

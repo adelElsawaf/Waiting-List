@@ -51,7 +51,8 @@ export class AuthController {
         console.log(frontendUrl)
         try {
             const { token } = await this.authService.handleGoogleAuth(req.user);
-            
+            console.log(token)
+            console.log("after token")
             // Set HTTP-only cookie
             res.cookie('authToken', token, {
                 httpOnly: true,
@@ -59,10 +60,13 @@ export class AuthController {
                 sameSite: 'lax',
                 maxAge: 24 * 60 * 60 * 1000 // 24 hours
             });
+            console.log("after setting cookie")
             // Redirect to frontend
             console.log(res.cookie)
+            console.log("adel is here ")
             res.redirect(frontendUrl + '/auth/callback');
         } catch (error) {
+            console.log("error is here")
             res.redirect(frontendUrl+'/auth/error');
         }
     }

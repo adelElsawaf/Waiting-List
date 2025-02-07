@@ -50,7 +50,7 @@ export class AuthController {
     async googleAuthRedirect(@Req() req, @Res() res: Response) {
         const { token } = await this.authService.handleGoogleAuth(req.user);
         res.cookie('access_token', token, {
-            httpOnly: false,
+            httpOnly: true,
             secure: true,
             sameSite: 'none',
             maxAge: 3600 * 1000, 

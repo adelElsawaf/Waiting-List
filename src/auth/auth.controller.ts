@@ -50,11 +50,11 @@ export class AuthController {
     async googleAuthRedirect(@Req() req, @Res() res: Response) {
         const { token } = await this.authService.handleGoogleAuth(req.user);
         res.cookie('access_token', token, {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'none',
-            maxAge: 3600 * 1000, 
-            domain:".railway.app"
+            httpOnly: true, // ✅ Prevent XSS attacks
+            secure: true, // ✅ Only send over HTTPS
+            sameSite: 'lax', // ✅ Mitigate CSRF risk while allowing cross-site requests when necessary
+            maxAge: 3600 * 1000,
+            domain: ".railway.app" // Ensure this is needed, otherwise restrict it
         });
         res.redirect(this.configService.get<string>('FRONT_END_URL'));
     }

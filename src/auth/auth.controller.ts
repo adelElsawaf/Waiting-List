@@ -54,7 +54,7 @@ export class AuthController {
             secure: true,
             sameSite: 'none',
             maxAge: 3600 * 1000, 
-            domain:"./railway"
+            domain:".railway.app"
         });
         res.redirect(this.configService.get<string>('FRONT_END_URL'));
     }

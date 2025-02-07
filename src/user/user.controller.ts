@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { BadRequestException, Body, Controller, Get, Header, Headers, HttpStatus, Param, Post, Query, Res, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Header, Headers, HttpStatus, Param, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 
@@ -13,8 +13,7 @@ export class UserController {
             throw new Error('Authorization token is missing');
         }
         const jwtToken = token.startsWith('Bearer ') ? token.split(' ')[1] : token;
-
-        return this.userService.getUserFromToken(jwtToken);
+        console.log(await this.userService.getUserFromToken(jwtToken))
+        return await this.userService.getUserFromToken(jwtToken);
     }
-
 }

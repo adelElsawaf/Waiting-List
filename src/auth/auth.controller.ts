@@ -44,45 +44,30 @@ export class AuthController {
     @UseGuards(GoogleAuthGuard)
     async googleAuth() { }
 
+
     @Get('google/redirect')
-    @UseGuards(GoogleAuthGuard)
+    @UseGuards(AuthGuard('google'))
     async googleAuthRedirect(@Req() req, @Res() res: Response) {
-        const frontendUrl = this.configService.get<string>('FRONT_END_URL');
-        console.log(frontendUrl)
-        try {
-            const { token } = await this.authService.handleGoogleAuth(req.user);
-            console.log(token)
-            console.log("after token")
-            // Set HTTP-only cookie
-            res.cookie('authToken', token, {
-                httpOnly: false,
-                secure: true, // Set to true only in production
-                sameSite: 'lax',
-                maxAge: 24 * 60 * 60 * 1000 // 24 hours
-                
-            });
-            console.log("after setting cookie")
-            // Redirect to frontend
-            console.log(res.getHeader('set-cookie'));
-            console.log("adel is here ")
-            res.redirect(frontendUrl + '/auth/callback');
-        } catch (error) {
-            console.log("error is here")
-            res.redirect(frontendUrl + '/auth/error');
-        }
+        const { token } = await this.authService.handleGoogleAuth(req.user);
+        res.cookie('access_token', token, {
+            httpOnly: false,
+            secure: true,
+            sameSite: 'strict',
+            maxAge: 3600 * 1000, 
+        });
+        res.redirect('http://localhost:3000');
     }
 
     @Get('verify')
     async verifyAuth(@Req() req, @Res() res: Response) {
         try {
             // Get token from cookie
-            const token = req.cookies['authToken'];
+            const token = req.cookies['auth_token'];
 
             if (!token) {
                 return res.status(401).json({ message: 'No token found' });
             }
 
-            // Verify token and get user data
             const userData = await this.authService.verifyToken(token);
             return res.json({ user: userData });
         } catch (error) {

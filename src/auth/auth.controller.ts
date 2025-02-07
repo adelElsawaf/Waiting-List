@@ -51,7 +51,7 @@ export class AuthController {
         const { token } = await this.authService.handleGoogleAuth(req.user);
         res.cookie('access_token', token, {
             httpOnly: false,
-            secure: true,
+            secure: false,
             sameSite: 'lax',
             maxAge: 3600 * 1000, 
         });

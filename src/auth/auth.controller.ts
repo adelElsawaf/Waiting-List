@@ -55,7 +55,7 @@ export class AuthController {
             sameSite: 'lax',
             maxAge: 3600 * 1000, 
         });
-        res.redirect('http://localhost:3000');
+        res.redirect(this.configService.get<string>('FRONT_END_URL'));
     }
 
     @Get('verify')

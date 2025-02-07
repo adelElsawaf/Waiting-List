@@ -59,20 +59,13 @@ export class AuthController {
         res.redirect(this.configService.get<string>('FRONT_END_URL'));
     }
 
-    @Get('verify')
-    async verifyAuth(@Req() req, @Res() res: Response) {
-        try {
-            // Get token from cookie
-            const token = req.cookies['auth_token'];
-
-            if (!token) {
-                return res.status(401).json({ message: 'No token found' });
-            }
-
-            const userData = await this.authService.verifyToken(token);
-            return res.json({ user: userData });
-        } catch (error) {
-            return res.status(401).json({ message: 'Invalid token' });
-        }
+    @Get('logout')
+    logout(@Res() res: Response) {
+        res.clearCookie('access_token', {
+            domain: '.railway.app',
+            secure: true,
+            sameSite: 'none',
+        });
+        return res.status(200).json({ message: 'Logged out successfully' });
     }
 }

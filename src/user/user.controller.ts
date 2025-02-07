@@ -19,7 +19,7 @@ export class UserController {
         if (!user) {
             throw new UnauthorizedException('Invalid token');
         }
-
+        console.log(user)
         return res.json(user);
     }
 }

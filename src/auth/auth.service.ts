@@ -51,12 +51,7 @@ export class AuthService {
         catch (error) {
             if (error instanceof UserAlreadyExistException) {
                 let user = (await this.userService.findByEmailSafe(userRegisterRequest.email)).user
-                if (user.googleId) {
-                    return await this.googleLogin(user.email, user.id)
-                }
-                else {
-                    throw new UnprocessableEntityException("User is not signed up with google")
-                }
+                    return await this.googleLogin(user.email, user.id)                
             }
         }
     }

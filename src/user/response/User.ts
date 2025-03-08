@@ -1,3 +1,4 @@
+import { WaitingPageEntity } from "src/waiting-page/waiting-page.entity";
 
 export class User {
 

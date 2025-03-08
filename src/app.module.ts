@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -7,6 +7,10 @@ import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { UserEntity } from './user/user.entity';
+import { WaitingPageModule } from './waiting-page/waiting-page.module';
+import { DropboxStorageModule } from './dropbox-storage/dropbox-storage.module';
+import { JwtUserMiddleware } from './auth/middleware/JwtUserMiddleware';
+import { WaitingPageEntity } from './waiting-page/waiting-page.entity';
 
 @Module({
   imports: [
@@ -24,14 +28,20 @@ import { UserEntity } from './user/user.entity';
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_NAME'),
-        entities: [UserEntity],
+        entities: [UserEntity, WaitingPageEntity],
         synchronize: true,
       }),
     }),
     UserModule,
     AuthModule,
+    WaitingPageModule,
+    DropboxStorageModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(JwtUserMiddleware).forRoutes('*'); // Apply middleware globally
+  }
+}

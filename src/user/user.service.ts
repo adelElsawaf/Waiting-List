@@ -181,5 +181,22 @@ export class UserService {
        return this.authService.verifyToken(token);
     }
 
+    async findByIdSafe(id: number): Promise<FindUserResponse | null> {
+        /**
+        * Getting User from DB
+        */
+        const foundUser = await this.userRepository.findOne({ where: { id } })
+        if (!foundUser) {
+            return null; // Return null if user is not found
+        }
+        /**
+         * Building response 
+         */
+        const response: FindUserResponse = {
+            user: await this.mapToUser(foundUser),
+        }
+        return response;
+    }
+
 
 }

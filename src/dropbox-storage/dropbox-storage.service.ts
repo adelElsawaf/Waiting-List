@@ -1,17 +1,61 @@
-import { Injectable, ConflictException, InternalServerErrorException, BadRequestException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+    Injectable,
+    ConflictException,
+    InternalServerErrorException,
+    BadRequestException,
+    NotFoundException,
+    UnauthorizedException
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Dropbox, DropboxResponseError } from 'dropbox';
+import { Dropbox } from 'dropbox';
+import axios from 'axios';
 
 @Injectable()
 export class DropboxStorageService {
     private dbx: Dropbox;
+    private accessToken: string;
+    private refreshToken: string;
+    private clientId: string;
+    private clientSecret: string;
     private appFolder: string;
+    private tokenExpiresAt: number;
 
-    constructor(configService: ConfigService) {
-        this.dbx = new Dropbox({ accessToken: configService.get<string>('DROPBOX_ACCESS_TOKEN') });
-        this.appFolder = configService.get<string>('DROPBOX_PAGES_IMAGES_FOLDER') || '';
+    constructor(private readonly configService: ConfigService) {
+        this.accessToken = this.configService.get<string>('DROPBOX_ACCESS_TOKEN');
+        this.refreshToken = this.configService.get<string>('DROPBOX_REFRESH_TOKEN');
+        this.clientId = this.configService.get<string>('DROPBOX_CLIENT_ID');
+        this.clientSecret = this.configService.get<string>('DROPBOX_CLIENT_SECRET');
+        this.appFolder = this.configService.get<string>('DROPBOX_PAGES_IMAGES_FOLDER') || '';
+
+        this.dbx = new Dropbox({ accessToken: this.accessToken, fetch: fetch });
+        this.tokenExpiresAt = Date.now() + 14400000;
+
+        // Background refresh every 3 hours
+        setInterval(async () => await this.refreshAccessToken(), 10800000);
     }
 
+    async refreshAccessToken() {
+        if (Date.now() < this.tokenExpiresAt) return;
+
+        try {
+            const response = await axios.post('https://api.dropbox.com/oauth2/token', null, {
+                params: {
+                    grant_type: 'refresh_token',
+                    refresh_token: this.refreshToken,
+                    client_id: this.clientId,
+                    client_secret: this.clientSecret,
+                },
+            });
+
+            this.accessToken = response.data.access_token;
+            this.tokenExpiresAt = Date.now() + 14400000;
+            this.dbx = new Dropbox({ accessToken: this.accessToken, fetch: fetch });
+
+            console.log('🔄 Dropbox Token Refreshed!');
+        } catch (error) {
+            throw new InternalServerErrorException('❌ Dropbox token refresh failed');
+        }
+    }
     /**
      * Uploads a file to Dropbox and returns the direct shared link.
      */
@@ -62,7 +106,6 @@ export class DropboxStorageService {
         return `${baseName}-${timestamp}${fileExtension}`; // Append timestamp to filename
     }
 
-
     /**
      * Cleans the Dropbox shared URL to ensure it uses ?raw=1 for direct access
      */
@@ -108,7 +151,6 @@ export class DropboxStorageService {
             throw new InternalServerErrorException(`Shared Link Error: ${error.message || 'Unknown error occurred.'}`);
         }
     }
-
 
     /**
      * Retrieves an existing shared link if available.

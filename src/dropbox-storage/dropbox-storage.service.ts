@@ -9,6 +9,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { Dropbox } from 'dropbox';
 import axios from 'axios';
+import * as cron from 'node-cron';
 
 @Injectable()
 export class DropboxStorageService {
@@ -30,13 +31,39 @@ export class DropboxStorageService {
         this.dbx = new Dropbox({ accessToken: this.accessToken, fetch: fetch });
         this.tokenExpiresAt = Date.now() + 14400000;
 
-        // Background refresh every 3 hours
-        setInterval(async () => await this.refreshAccessToken(), 10800000);
+        // 🔄 Force token refresh every 1 hour to prevent Dropbox 24-hour expiration
+        cron.schedule('0 * * * *', async () => {
+            console.log('⏳ Forced token refresh to keep the session alive');
+            await this.refreshAccessToken();
+        });
     }
 
-    async refreshAccessToken() {
-        if (Date.now() < this.tokenExpiresAt) return;
+    /**
+     * Ensures the token is refreshed only if expired
+     */
+    async ensureValidToken() {
+        if (!this.tokenExpiresAt) {
+            console.warn('⚠️ Warning: tokenExpiresAt is not set. Forcing token refresh...');
+            await this.refreshAccessToken();
+            return;
+        }
 
+        console.log(`🕒 Current Time: ${new Date().toISOString()}`);
+        console.log(`🔒 Token Expires At: ${new Date(this.tokenExpiresAt).toISOString()}`);
+
+        if (Date.now() >= this.tokenExpiresAt) {
+            console.log('🔄 Token has expired. Refreshing now...');
+            await this.refreshAccessToken();
+        } else {
+            console.log('✅ Access token is still valid.');
+        }
+    }
+
+
+    /**
+     * Refreshes the Dropbox access token using the refresh token
+     */
+    async refreshAccessToken() {
         try {
             const response = await axios.post('https://api.dropbox.com/oauth2/token', null, {
                 params: {
@@ -48,14 +75,15 @@ export class DropboxStorageService {
             });
 
             this.accessToken = response.data.access_token;
-            this.tokenExpiresAt = Date.now() + 14400000;
+            this.tokenExpiresAt = Date.now() + 14400000; // 4 hours validity
             this.dbx = new Dropbox({ accessToken: this.accessToken, fetch: fetch });
-
-            console.log('🔄 Dropbox Token Refreshed!');
+            
+            console.log('✅ Dropbox Token Refreshed Successfully');
         } catch (error) {
-            throw new InternalServerErrorException('❌ Dropbox token refresh failed');
+            throw new InternalServerErrorException('❌ Failed to refresh Dropbox token');
         }
     }
+
     /**
      * Uploads a file to Dropbox and returns the direct shared link.
      */

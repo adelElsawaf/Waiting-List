@@ -48,6 +48,12 @@ export class WaitingPageService {
         const baseSlug = slugify(title, { lower: true, strict: true });
         return `${baseSlug}-${shortUUID}`;
     }
+    async getWaitingPageByIdAsEntity(id: number): Promise<WaitingPageEntity> {
+        return await this.waitingPageRepository.findOne({
+            where: { id },
+            relations: ['owner'], // ✅ This will load the owner
+        });
+    }
 
 
 }

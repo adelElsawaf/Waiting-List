@@ -11,6 +11,8 @@ import { WaitingPageModule } from './waiting-page/waiting-page.module';
 import { DropboxStorageModule } from './dropbox-storage/dropbox-storage.module';
 import { JwtUserMiddleware } from './auth/middleware/JwtUserMiddleware';
 import { WaitingPageEntity } from './waiting-page/waiting-page.entity';
+import { DynamicFormModule } from './dynamic-form/dynamic-form.module';
+import { FieldModule } from './field/field.module';
 
 @Module({
   imports: [
@@ -28,7 +30,7 @@ import { WaitingPageEntity } from './waiting-page/waiting-page.entity';
         username: configService.get<string>('DB_USERNAME'),
         password: configService.get<string>('DB_PASSWORD'),
         database: configService.get<string>('DB_NAME'),
-        entities: [UserEntity, WaitingPageEntity],
+        autoLoadEntities: true,
         synchronize: true,
       }),
     }),
@@ -36,6 +38,8 @@ import { WaitingPageEntity } from './waiting-page/waiting-page.entity';
     AuthModule,
     WaitingPageModule,
     DropboxStorageModule,
+    DynamicFormModule,
+    FieldModule,
   ],
   controllers: [AppController],
   providers: [AppService],

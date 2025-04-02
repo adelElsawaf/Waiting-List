@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Post, UseGuards, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Post, UseGuards, UploadedFile, UseInterceptors, Get, Param } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { LoggedInUser } from 'src/user/decorator/loggedInUser';
 import { UserEntity } from 'src/user/user.entity';
@@ -6,6 +6,8 @@ import { CreateWaitingPageDto } from './request/CreateWaitingPageDTO';
 import { WaitingPageService } from './waiting-page.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { CreateWaitingPageResponseDTO } from './response/CreateWaitingPageResponseDTO';
+import GetWaitingPageResponseDTO from './response/GetWaitingPageResponseDTO';
+
 
 @Controller('waiting-page')
 export class WaitingPageController {
@@ -27,5 +29,18 @@ export class WaitingPageController {
         const dtoWithFile: CreateWaitingPageDto = { ...dto, backgroundImg };
 
         return this.waitingPageService.createWaitingPage(user, dtoWithFile);
+    }
+    @Get(":uniqueTitle")
+    async getWaitingPage(
+        @LoggedInUser() user:UserEntity,
+        @Param("uniqueTitle") uniqueTitle: string): Promise<GetWaitingPageResponseDTO> {
+        return this.waitingPageService.getWaitingPageByUniqueTitle(user,uniqueTitle);
+    }
+
+    @Get()
+    @UseGuards(JwtAuthGuard)
+    async getAllWaitingPages(
+        @LoggedInUser() user:UserEntity): Promise<GetWaitingPageResponseDTO[]> {
+        return this.waitingPageService.getAllWaitingPages(user);
     }
 }

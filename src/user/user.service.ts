@@ -185,6 +185,7 @@ export class UserService {
         /**
         * Getting User from DB
         */
+         console.log(id)
         const foundUser = await this.userRepository.findOne({ where: { id } })
         if (!foundUser) {
             return null; // Return null if user is not found
@@ -195,6 +196,8 @@ export class UserService {
         const response: FindUserResponse = {
             user: await this.mapToUser(foundUser),
         }
+        console.log("x")
+        console.log(response.user)
         return response;
     }
 

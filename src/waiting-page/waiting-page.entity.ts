@@ -2,7 +2,7 @@ import { DynamicFormEntity } from "src/dynamic-form/dynamic-form.entity";
 import { UserEntity } from "src/user/user.entity";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, JoinColumn, OneToOne } from "typeorm";
 
-@Entity("waiting_page")
+@Entity("waiting_pages")
 export class WaitingPageEntity {
     @PrimaryGeneratedColumn()
     id: number;

@@ -10,12 +10,13 @@ import slugify from 'slugify';
 import { use } from 'passport';
 import { CreateWaitingPageResponseDTO } from './response/CreateWaitingPageResponseDTO';
 import { DropboxStorageService } from 'src/dropbox-storage/dropbox-storage.service';
+import GetWaitingPageResponseDTO from './response/GetWaitingPageResponseDTO';
 @Injectable()
 export class WaitingPageService {
     constructor(
         @InjectRepository(WaitingPageEntity)
         private readonly waitingPageRepository :Repository<WaitingPageEntity>,
-        configService: ConfigService,
+        private readonly configService: ConfigService,
         private  dropboxStorageService: DropboxStorageService
     ) { }
     
@@ -55,5 +56,59 @@ export class WaitingPageService {
         });
     }
 
+    async getWaitingPageByUniqueTitle(
+        loggedInUser: UserEntity,
+        title: string
+    ): Promise<GetWaitingPageResponseDTO> {
+        let waitingPage: WaitingPageEntity | null = null;
+        if (loggedInUser) {
+            // 🔹 Define behavior for logged-in users
+            // Example: Fetch waiting page only if user is the owner
+            waitingPage = await this.waitingPageRepository.findOne({
+                where: { generatedTitle: title, owner: loggedInUser },
+                relations: [
+                    "form",
+                    "form.fields",
+                    "form.submissions",
+                    "form.submissions.answers",
+                    "form.submissions.answers.field",
+                ],
+            });
+        } else {
+            // 🔹 Fetch without owner filter for non-logged-in users
+            waitingPage = await this.waitingPageRepository.findOne({
+                where: { generatedTitle: title },
+                relations: [
+                    "form",
+                    "form.fields",
+                ]
+            });
+        }
 
+        if (!waitingPage) {
+            throw new Error(`Waiting page with title '${title}' not found`);
+        }
+        const shareableUrl = this.generateShareablePageURL(title)
+        return GetWaitingPageResponseDTO.fromEntity(waitingPage,shareableUrl);
+    }
+
+    async getAllWaitingPages(user: UserEntity): Promise<GetWaitingPageResponseDTO[]> {
+        const waitingPages = await this.waitingPageRepository.find({
+            where: { owner: user },
+            order: { id: 'DESC' },
+        });
+        return waitingPages.map(page => {
+            const shareableURL = this.generateShareablePageURL(page.generatedTitle);
+            return GetWaitingPageResponseDTO.fromEntity(page, shareableURL);
+        });
+    }
+
+     generateShareablePageURL(uniqueTitle: string): string {
+        const frontendBaseUrl = this.configService.get<string>('FRONT_END_URL');
+        if (!frontendBaseUrl) {
+            throw new Error('FRONTEND_BASE_URL is not defined in environment variables.');
+        }
+
+        return `${frontendBaseUrl}/waiting-page/${uniqueTitle}`;
+    }
 }

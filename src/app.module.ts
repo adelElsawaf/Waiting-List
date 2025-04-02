@@ -13,6 +13,8 @@ import { JwtUserMiddleware } from './auth/middleware/JwtUserMiddleware';
 import { WaitingPageEntity } from './waiting-page/waiting-page.entity';
 import { DynamicFormModule } from './dynamic-form/dynamic-form.module';
 import { FieldModule } from './field/field.module';
+import { FieldAnswerModule } from './field-answer/field-answer.module';
+import { FormSubmissionModule } from './form-submission/form-submission.module';
 
 @Module({
   imports: [
@@ -40,6 +42,8 @@ import { FieldModule } from './field/field.module';
     DropboxStorageModule,
     DynamicFormModule,
     FieldModule,
+    FieldAnswerModule,
+    FormSubmissionModule,
   ],
   controllers: [AppController],
   providers: [AppService],

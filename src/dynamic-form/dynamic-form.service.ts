@@ -7,6 +7,9 @@ import { FieldService } from 'src/field/field.service';
 import { CreateDynamicFormRequest } from './request/CreateDynamicFormRequest';
 import { CreateDynamicFormResponse } from './response/CreateDynamicFormResponse';
 import { UserEntity } from 'src/user/user.entity';
+import { FieldAnswerService } from 'src/field-answer/field-answer.service';
+import { FormNotFoundException } from './exception/FormNotFoundException';
+import { FormHasNoFieldsException } from './exception/FormHasNoFieldsException';
 
 @Injectable()
 export class DynamicFormService {
@@ -15,6 +18,7 @@ export class DynamicFormService {
         private readonly dynamicFormRepository: Repository<DynamicFormEntity>,
         private readonly waitingPageService: WaitingPageService,
         private readonly fieldService: FieldService,
+        private readonly fieldAnswerService: FieldAnswerService,
         @InjectEntityManager()
         private readonly entityManager: EntityManager,
     ) { }
@@ -38,4 +42,25 @@ export class DynamicFormService {
             return CreateDynamicFormResponse.fromEntity(dynamicFormWithFields);
         });
     }
+
+    async getFormFields(formId: number) {
+        const form = await this.dynamicFormRepository.findOne({
+            where: { id: formId },
+            relations: ['fields'],
+        });
+        if (!form) throw new NotFoundException('Form not found');
+        if(!form.fields.length) throw new FormHasNoFieldsException(formId);
+        return form.fields;
+    }
+
+    async getFormAsEntityById(formId: number) {
+        const form = await this.dynamicFormRepository.findOne({
+            where: { id: formId },
+        });
+        if (!form) throw new FormNotFoundException(formId);
+        return form;
+    }
+
+
+
 }

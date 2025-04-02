@@ -20,7 +20,7 @@ export class JwtUserMiddleware implements NestMiddleware {
 
             try {
                 const decoded = this.jwtService.verify(token);
-                const userId = decoded.sub;
+                const userId = decoded.userId;
                 const user = await this.userService.findByIdSafe(userId);
                 console.log(user.user)
                 if (user) {

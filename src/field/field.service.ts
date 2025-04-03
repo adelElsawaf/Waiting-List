@@ -4,6 +4,7 @@ import { FieldEntity } from './field.entity';
 import { EntityManager, Repository } from 'typeorm';
 import { CreateFieldRequest } from './request/CreateFieldRequest';
 import FieldNotFoundException from './exception/FieldNotFoundException';
+import { FieldTypeEnum } from './enum/FieldTypeEnum';
 
 @Injectable()
 export class FieldService {
@@ -33,4 +34,14 @@ export class FieldService {
         return fields;
     }
 
+     getSeedData () : CreateFieldRequest[] {
+        return [
+            {
+                title: 'Email',
+                type: FieldTypeEnum.EMAIL,
+                placeholder: 'Enter your Email',
+                isMandatory: true,
+            }
+        ]
+    }
 }

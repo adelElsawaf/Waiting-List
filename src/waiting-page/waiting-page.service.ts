@@ -56,9 +56,9 @@ export class WaitingPageService {
         });
     }
 
-    async getWaitingPageByUniqueTitle(
-        loggedInUser: UserEntity,
-        title: string
+    async getWaitingPageByUniqueTitle(title: string,
+        loggedInUser?: UserEntity,
+       
     ): Promise<GetWaitingPageResponseDTO> {
         let waitingPage: WaitingPageEntity | null = null;
         if (loggedInUser) {

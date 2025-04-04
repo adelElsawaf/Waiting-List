@@ -1,6 +1,7 @@
 import { DynamicFormEntity } from "src/dynamic-form/dynamic-form.entity";
 import { UserEntity } from "src/user/user.entity";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, JoinColumn, OneToOne } from "typeorm";
+import WaitingPageViewDataEntity from "src/waiting-page-view-log/waiting-page-view-log.entity";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, JoinColumn, OneToOne, OneToMany } from "typeorm";
 
 @Entity("waiting_pages")
 export class WaitingPageEntity {
@@ -26,4 +27,7 @@ export class WaitingPageEntity {
 
     @OneToOne(() => DynamicFormEntity, (form) => form.waitingPage)
     form: DynamicFormEntity;
+
+    @OneToMany(() => WaitingPageViewDataEntity, (viewData) => viewData.waitingPage)
+    views: WaitingPageViewDataEntity[];
 }

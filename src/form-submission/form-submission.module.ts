@@ -13,5 +13,6 @@ import { FormSubmissionEntity } from './form-submission.entity';
   imports: [TypeOrmModule.forFeature([FormSubmissionEntity]),
     DynamicFormModule,
     FieldAnswerModule],
+  exports:[FormSubmissionService]
 })
 export class FormSubmissionModule {}

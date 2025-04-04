@@ -14,7 +14,6 @@ import { GetFormSubmissionResponse } from './response/GetFormSubmissionResponse'
 @Injectable()
 export class FormSubmissionService {
     constructor(
-        private readonly fieldAnswerService: FieldAnswerService,
         private readonly dynamicFormService: DynamicFormService,
         @InjectRepository(FormSubmissionEntity)
         private readonly formSubmissionRepository: Repository<FormSubmissionEntity>,
@@ -59,6 +58,9 @@ export class FormSubmissionService {
             throw new NotFoundException(`No submissions found for form ID ${formId}.`);
         }
         return submissions.map(GetFormSubmissionResponse.fromEntity);
+    }
+    async getFormSubmissionCount(formId: number): Promise<number> {
+        return this.formSubmissionRepository.count({ where: { form: { id: formId } } });
     }
 
 }

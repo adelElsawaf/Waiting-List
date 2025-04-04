@@ -15,6 +15,8 @@ import { DynamicFormModule } from './dynamic-form/dynamic-form.module';
 import { FieldModule } from './field/field.module';
 import { FieldAnswerModule } from './field-answer/field-answer.module';
 import { FormSubmissionModule } from './form-submission/form-submission.module';
+import { WaitingPageViewLogModule } from './waiting-page-view-log/waiting-page-view-log.module';
+import { WaitingPageWithAnalyticsModule } from './waiting-page-with-analytics/waiting-page-with-analytics.module';
 
 @Module({
   imports: [
@@ -44,6 +46,8 @@ import { FormSubmissionModule } from './form-submission/form-submission.module';
     FieldModule,
     FieldAnswerModule,
     FormSubmissionModule,
+    WaitingPageViewLogModule,
+    WaitingPageWithAnalyticsModule
   ],
   controllers: [AppController],
   providers: [AppService],

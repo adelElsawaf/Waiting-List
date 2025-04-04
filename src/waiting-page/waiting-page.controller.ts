@@ -7,11 +7,14 @@ import { WaitingPageService } from './waiting-page.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { CreateWaitingPageResponseDTO } from './response/CreateWaitingPageResponseDTO';
 import GetWaitingPageResponseDTO from './response/GetWaitingPageResponseDTO';
+import { WaitingPageWithAnalyticsService } from 'src/waiting-page-with-analytics/waiting-page-with-analytics.service';
+import { log } from 'console';
 
 
 @Controller('waiting-page')
 export class WaitingPageController {
-    constructor(private readonly waitingPageService: WaitingPageService) { }
+    constructor(private readonly waitingPageService: WaitingPageService,
+    ) { }
 
     @UseGuards(JwtAuthGuard)
     @Post()
@@ -34,7 +37,7 @@ export class WaitingPageController {
     async getWaitingPage(
         @LoggedInUser() user:UserEntity,
         @Param("uniqueTitle") uniqueTitle: string): Promise<GetWaitingPageResponseDTO> {
-        return this.waitingPageService.getWaitingPageByUniqueTitle(user,uniqueTitle);
+        return this.waitingPageService.getWaitingPageByUniqueTitle(uniqueTitle,user);
     }
 
     @Get()

@@ -13,49 +13,29 @@ import { AuthService } from 'src/auth/auth.service';
 @Injectable()
 export class UserService {
 
-    /**
-     * The constructor for the UsersService.
-     * @param userRepository The repository for the UserEntity.
-     */
     constructor(
         @InjectRepository(UserEntity)
         private readonly userRepository: Repository<UserEntity>,
 
-        @Inject(forwardRef(() => AuthService)) // Use forwardRef to avoid circular dependency
+        @Inject(forwardRef(() => AuthService)) 
         private readonly authService: AuthService,
     ) { }
 
-
-    /**
-     * Creates a local user.
-     * @param email The email address of the user.
-     * @param password The password of the user.
-     * @param firstName The first name of the user.
-     * @param lastName The last name of the user.
-     * @returns A promise that resolves to a CreateUserResponse if the user was created successfully.
-     * @throws UserAlreadyExistException if a user with the given email already exists.
-     */
     async createLocalUser(
         email: string,
         password: string,
         firstName: string,
         lastName: string,
     ): Promise<CreateUserResponse> {
-        /**
-        * Check first if user exist before adding it
-        */
+
         const existingUser = await this.findByEmailSafe(email) // Avoid exception if user not found
         if (existingUser) {
             throw new UserAlreadyExistException(`User with email ${email} already exists`);
         }
         else {
-            /**
-             * Hashing password for security
-             */
+
             const hashedPassword = await bcrypt.hash(password, 10);
-            /**
-             * Create new User in db
-             */
+
             const createdUser = await this.userRepository.save({
                 email,
                 password: hashedPassword,
@@ -63,49 +43,31 @@ export class UserService {
                 lastName,
             });
 
-            /**
-             * Building response
-             */
             const response: CreateUserResponse = {
                 user: await this.mapToUser(createdUser)
             };
             return response
         }
     }
-    /**
-     * Create a user from a Google sign-in request.
-     * @param email The email address of the user.
-     * @param googleId The Google ID of the user.
-     * @param firstName The first name of the user.
-     * @param lastName The last name of the user.
-     * @returns A promise that resolves to a CreateUserResponse if successful.
-     * @throws UserAlreadyExistException if a user with the given email already exists.
-     */
     async createGoogleUser(
         email: string,
         googleId: string,
         firstName: string,
         lastName: string,
     ): Promise<CreateUserResponse> {
-        /**
-         * Check first if user exist before adding it
-         */
+
         const foundUserByEmail = await this.findByEmailSafe(email)
         if (foundUserByEmail) {
             throw new UserAlreadyExistException(`User with email ${email} already exist`);
         }
-        /**
-         * Create new User in database
-         */
+
         const createdUser = await this.userRepository.save({
             email,
             googleId,
             firstName,
             lastName,
         });
-        /**
-       * Building response
-       */
+
         const createdUserResponse: User = {
             id: createdUser.id,
             email: createdUser.email,
@@ -118,53 +80,30 @@ export class UserService {
         };
         return response;
     }
-    /**
-     * Finds a user by their email address.
-     * @param email - The email address of the user to find.
-     * @returns A promise that resolves to the UserEntity if found.
-     * @throws UserNotFoundException if no user with the given email is found.
-     */
+
     async findByEmail(email: string): Promise<FindUserResponse> {
-        /**
-         * Getting User from DB
-         */
+
         const foundUser = await this.userRepository.findOne({ where: { email } })
         if (!foundUser)
             throw new UserNotFoundException(`No User with email ${email} is found`)
-        /**
-         * Building response 
-         */
+
         const response: FindUserResponse = {
             user: await this.mapToUser(foundUser),
         }
         return response;
     }
-    /**
-     * Finds a user by their email address.
-     * @param email - The email address of the user to find.
-     * @returns A promise that resolves to the UserEntity if found, or null if no user with the given email is found.
-     */
-    async findByEmailSafe(email: string): Promise<FindUserResponse | null> {
-        /**
-        * Getting User from DB
-        */
+     async findByEmailSafe(email: string): Promise<FindUserResponse | null> {
+      
         const foundUser = await this.userRepository.findOne({ where: { email } })
         if (!foundUser) {
-            return null; // Return null if user is not found
+            return null; 
         }
-        /**
-         * Building response 
-         */
+       
         const response: FindUserResponse = {
             user: await this.mapToUser(foundUser),
         }
         return response;
     }
-    /**
-     * Maps a UserEntity to a User.
-     * @param UserAsEntity The UserEntity to map.
-     * @returns A promise that resolves to the mapped User.
-     */
     private async mapToUser(userAsEntity?: UserEntity): Promise<User> {
         const user: User = {
             id: userAsEntity.id,
@@ -182,21 +121,32 @@ export class UserService {
     }
 
     async findByIdSafe(id: number): Promise<FindUserResponse | null> {
-        /**
-        * Getting User from DB
-        */
+       
         const foundUser = await this.userRepository.findOne({ where: { id } })
         if (!foundUser) {
-            return null; // Return null if user is not found
+            return null; 
         }
-        /**
-         * Building response 
-         */
         const response: FindUserResponse = {
             user: await this.mapToUser(foundUser),
         }
         return response;
     }
+  async  findByIdAsEntity(id: number): Promise<UserEntity> {
+        const foundUser = await this.userRepository.findOne({ where: { id } })
+        if (!foundUser)
+            throw new UserNotFoundException(`No User with email ${id} is found`)
+        return foundUser;
+    }
 
-
+    async incrementUserCredit(userId: number, credit: number) {
+        const user = await this.findByIdAsEntity(userId);
+        user.credits += credit;
+        await this.userRepository.save(user);
+        
+    }
+    async decrementUserCredit(userId: number, credit: number) {
+        const user = await this.findByIdAsEntity(userId);
+        user.credits -= credit;
+        await this.userRepository.save(user);
+    }
 }

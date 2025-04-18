@@ -23,4 +23,7 @@ export class UserEntity {
 
     @OneToMany(() => WaitingPageEntity, (waitingPage) => waitingPage.owner, { cascade: true })
     waitingPages: WaitingPageEntity[];
+
+    @Column({ default: 0 })
+    credits: number;
 }

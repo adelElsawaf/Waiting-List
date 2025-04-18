@@ -6,18 +6,18 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
-import { UserEntity } from './user/user.entity';
 import { WaitingPageModule } from './waiting-page/waiting-page.module';
 import { DropboxStorageModule } from './dropbox-storage/dropbox-storage.module';
 import { JwtUserMiddleware } from './auth/middleware/JwtUserMiddleware';
-import { WaitingPageEntity } from './waiting-page/waiting-page.entity';
 import { DynamicFormModule } from './dynamic-form/dynamic-form.module';
 import { FieldModule } from './field/field.module';
 import { FieldAnswerModule } from './field-answer/field-answer.module';
 import { FormSubmissionModule } from './form-submission/form-submission.module';
 import { WaitingPageViewLogModule } from './waiting-page-view-log/waiting-page-view-log.module';
 import { WaitingPageWithAnalyticsModule } from './waiting-page-with-analytics/waiting-page-with-analytics.module';
-
+import { LemonSqueezyService } from './lemon-squeezy/lemon-squeezy.service';
+import { LemonSqueezyController } from './lemon-squeezy/lemon-squeezy.controller';
+import { LemonSqueezyModule } from './lemon-squeezy/lemon-squeezy.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -47,10 +47,11 @@ import { WaitingPageWithAnalyticsModule } from './waiting-page-with-analytics/wa
     FieldAnswerModule,
     FormSubmissionModule,
     WaitingPageViewLogModule,
-    WaitingPageWithAnalyticsModule
+    WaitingPageWithAnalyticsModule,
+    LemonSqueezyModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, LemonSqueezyController],
+  providers: [AppService, LemonSqueezyService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

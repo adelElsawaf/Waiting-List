@@ -1,6 +1,6 @@
-import { Injectable, Inject, forwardRef } from '@nestjs/common'; 
+import { Injectable, Inject, forwardRef, BadRequestException } from '@nestjs/common'; 
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { UserEntity } from './user.entity';
 import { CreateUserResponse } from './response/CreateUserResponse';
@@ -73,7 +73,8 @@ export class UserService {
             email: createdUser.email,
             firstName: createdUser.firstName,
             lastName: createdUser.lastName,
-            googleId: createdUser.googleId
+            googleId: createdUser.googleId,
+            credits: createdUser.credits,
         }
         const response: CreateUserResponse = {
             user: createdUserResponse
@@ -111,7 +112,8 @@ export class UserService {
             password: userAsEntity.password,
             firstName: userAsEntity.firstName,
             lastName: userAsEntity.lastName,
-            googleId: userAsEntity.googleId
+            googleId: userAsEntity.googleId,
+            credits: userAsEntity.credits,
         }
         return user
     }
@@ -144,9 +146,26 @@ export class UserService {
         await this.userRepository.save(user);
         
     }
-    async decrementUserCredit(userId: number, credit: number) {
-        const user = await this.findByIdAsEntity(userId);
-        user.credits -= credit;
-        await this.userRepository.save(user);
+    async decrementUserCreditTransactional(
+        userId: number,
+        amount: number,
+        manager: EntityManager,
+    ): Promise<void> {
+        const user = await manager.findOne(UserEntity, {
+            where: { id: userId },
+            lock: { mode: 'pessimistic_write' },
+        });
+
+        if (!user) {
+            throw new BadRequestException('User not found');
+        }
+
+        if (user.credits < amount) {
+            throw new BadRequestException('Insufficient credits');
+        }
+
+        user.credits -= amount;
+        await manager.save(UserEntity, user);
     }
+
 }

@@ -14,4 +14,5 @@ export class User {
 
     googleId?: string
 
+    credits:number
 }

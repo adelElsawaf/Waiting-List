@@ -30,4 +30,7 @@ export class WaitingPageEntity {
 
     @OneToMany(() => WaitingPageViewDataEntity, (viewData) => viewData.waitingPage)
     views: WaitingPageViewDataEntity[];
+    
+    @Column()
+    isFree:Boolean
 }

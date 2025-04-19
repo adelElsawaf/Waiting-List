@@ -12,7 +12,7 @@ import { ConfigService } from '@nestjs/config';
 @Injectable()
 export class LemonSqueezyService {
     private variantCreditMap: { [key: string]: number } = {
-        '767803': 200, // Replace with your actual Variant IDs
+        '767803': 200,
         '767807': 500,
         '767809': 1000,
     };
@@ -69,7 +69,6 @@ export class LemonSqueezyService {
                 },
             },
         };
-        console.log(checkoutData)
         try {
             const response = await axios.post(
                 'https://api.lemonsqueezy.com/v1/checkouts',

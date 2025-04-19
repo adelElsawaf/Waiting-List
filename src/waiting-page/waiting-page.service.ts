@@ -1,6 +1,6 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Transaction } from 'typeorm';
+import { DataSource, EntityManager, Repository, Transaction } from 'typeorm';
 import { WaitingPageEntity } from './waiting-page.entity';
 import { UserEntity } from 'src/user/user.entity';
 import { v4 as uuidv4 } from 'uuid';
@@ -11,35 +11,65 @@ import { use } from 'passport';
 import { CreateWaitingPageResponseDTO } from './response/CreateWaitingPageResponseDTO';
 import { DropboxStorageService } from 'src/dropbox-storage/dropbox-storage.service';
 import GetWaitingPageResponseDTO from './response/GetWaitingPageResponseDTO';
+import { User } from 'src/user/response/User';
+import { UserService } from 'src/user/user.service';
 @Injectable()
 export class WaitingPageService {
+    private pageCost;
     constructor(
         @InjectRepository(WaitingPageEntity)
         private readonly waitingPageRepository :Repository<WaitingPageEntity>,
         private readonly configService: ConfigService,
-        private  dropboxStorageService: DropboxStorageService
-    ) { }
+        private readonly userService: UserService,
+        private  dropboxStorageService: DropboxStorageService,
+        private readonly dataSource: DataSource,
+    ) { 
+        this.pageCost = this.configService.get<number>('PAGE_COST');
+    }
     
-    async createWaitingPage(user: UserEntity, dto: CreateWaitingPageDto): Promise<CreateWaitingPageResponseDTO> {
-        const userWaitingPages = await this.getUserWaitingPages(user);
-        if (userWaitingPages.length >= 5) {
-            throw new BadRequestException('User already has 5 waiting pages');
+    async createWaitingPage(
+        user: UserEntity,
+        dto: CreateWaitingPageDto,
+    ): Promise<CreateWaitingPageResponseDTO> {
+        const userWaitingPages = await this.getUserFreeWaitingPages(user);
+
+        if (dto.isFree && userWaitingPages.length >= 5) {
+            throw new BadRequestException('User already has 5 free waiting pages');
         }
-        const uniqueSlug = await this.generateUniqueSlug(dto.title);
+        if(!dto.isFree && user.credits < this.pageCost) {
+            throw new UnprocessableEntityException('User does not have enough credits');
+        }
+
         const backgroundImgUrl = await this.dropboxStorageService.upload(dto.backgroundImg);
-        const waitingPage = this.waitingPageRepository.create({
-            ...dto,
-            backgroundImgUrl: backgroundImgUrl,
-            generatedTitle: uniqueSlug,
-            owner: user
-        });
-        const savedWaitingPage = await this.waitingPageRepository.save(waitingPage);
+        const uniqueSlug = await this.generateUniqueSlug(dto.title);
+
+        const savedWaitingPage = await this.dataSource.transaction(
+            async (manager: EntityManager) => {
+                if (!dto.isFree) {
+                    await this.userService.decrementUserCreditTransactional(
+                        user.id,
+                        this.pageCost,
+                        manager,
+                    );
+                }
+                const waitingPage = this.waitingPageRepository.create({
+                    ...dto,
+                    backgroundImgUrl,
+                    generatedTitle: uniqueSlug,
+                    owner: user,
+                    isFree: dto.isFree,
+                });
+                return await manager.save(WaitingPageEntity, waitingPage);
+            },
+        );
+
         return CreateWaitingPageResponseDTO.fromEntity(savedWaitingPage);
     }
 
-    async getUserWaitingPages(user: UserEntity): Promise<WaitingPageEntity[]> {
+
+    async getUserFreeWaitingPages(user: UserEntity): Promise<WaitingPageEntity[]> {
         return this.waitingPageRepository.find({
-            where: { owner: { id: user.id } },
+            where: { owner: { id: user.id } , isFree: true },
             order: { id: 'DESC' },
         });
     }

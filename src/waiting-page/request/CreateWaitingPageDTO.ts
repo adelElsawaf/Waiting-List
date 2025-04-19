@@ -1,4 +1,5 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsBoolean, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateWaitingPageDto {
     @IsNotEmpty()
@@ -9,6 +10,10 @@ export class CreateWaitingPageDto {
     @IsString()
     subTitle: string;
 
-    backgroundImg?: Express.Multer.File;;
+    backgroundImg?: Express.Multer.File;
 
+    @IsNotEmpty()
+    @IsBoolean()
+    @Transform(({ value }) => value === 'true')
+    isFree:boolean
 }

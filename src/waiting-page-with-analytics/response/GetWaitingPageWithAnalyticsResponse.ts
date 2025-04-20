@@ -5,7 +5,7 @@ export class GetWaitingPageWithAnalyticsResponse {
     numberOfUniqueViewers: number;
     numberOfSubmissions: number;
 
-    static fromEntity(waitingPage: GetWaitingPageResponseDTO, numberOfUniqueViewers: number , numberOfSubmissions:number): GetWaitingPageWithAnalyticsResponse {
+    static fromEntity(waitingPage: GetWaitingPageResponseDTO, numberOfUniqueViewers?: number , numberOfSubmissions?:number): GetWaitingPageWithAnalyticsResponse {
         const dto = new GetWaitingPageWithAnalyticsResponse();
         dto.waitingPage = waitingPage;
         dto.numberOfUniqueViewers = numberOfUniqueViewers;

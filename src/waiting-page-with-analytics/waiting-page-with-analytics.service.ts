@@ -14,10 +14,14 @@ export class WaitingPageWithAnalyticsService {
         private readonly formSubmissionService : FormSubmissionService
     ){}
     async getWaitingPageWithAnalytics(uniqueTitle: string, loggedInUser: UserEntity): Promise<GetWaitingPageWithAnalyticsResponse> {
+        let numberOfSubmissions = 0
         const waitingPage = await this.waitingPageService.getWaitingPageByUniqueTitle(uniqueTitle,loggedInUser);
-            const numberOfUniqueViewers = await this.waitingPageViewLogService.getNumberOfUniqueViewersForPage(waitingPage.id)
-            const numberOfSubmissions =  await this.formSubmissionService.getFormSubmissionCount(waitingPage.form.id);
+        const numberOfUniqueViewers = await this.waitingPageViewLogService.getNumberOfUniqueViewersForPage(waitingPage.id)
+        if(waitingPage.form){
+        numberOfSubmissions =  await this.formSubmissionService.getFormSubmissionCount(waitingPage.form.id);
+        }
         return GetWaitingPageWithAnalyticsResponse.fromEntity(waitingPage, numberOfUniqueViewers, numberOfSubmissions);
+
     }
 
 

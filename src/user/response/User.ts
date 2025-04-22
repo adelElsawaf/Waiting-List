@@ -1,3 +1,4 @@
+import GetWaitingPageResponseDTO from "src/waiting-page/response/GetWaitingPageResponseDTO";
 import { WaitingPageEntity } from "src/waiting-page/waiting-page.entity";
 
 export class User {
@@ -15,4 +16,6 @@ export class User {
     googleId?: string
 
     credits:number
+
+    waitingPages?: GetWaitingPageResponseDTO[]
 }

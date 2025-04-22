@@ -6,6 +6,7 @@ export class CreateWaitingPageResponseDTO {
     subTitle: string;
     backgroundImageUrl: string;
     generatedTitle: string;
+    shareableURL : string
 
     // Static mapper method
     static fromEntity(entity: WaitingPageEntity): CreateWaitingPageResponseDTO {
@@ -15,6 +16,7 @@ export class CreateWaitingPageResponseDTO {
         dto.subTitle = entity.subTitle;
         dto.backgroundImageUrl = entity.backgroundImgUrl;
         dto.generatedTitle = entity.generatedTitle;
+        dto.shareableURL = entity.shareableUrl
         return dto;
     }
 }

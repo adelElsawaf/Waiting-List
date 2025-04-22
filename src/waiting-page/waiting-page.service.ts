@@ -42,6 +42,7 @@ export class WaitingPageService {
 
         const backgroundImgUrl = await this.dropboxStorageService.upload(dto.backgroundImg);
         const uniqueSlug = await this.generateUniqueSlug(dto.title);
+        const shareableURL = await this.generateShareablePageURL(uniqueSlug);
 
         const savedWaitingPage = await this.dataSource.transaction(
             async (manager: EntityManager) => {
@@ -58,6 +59,7 @@ export class WaitingPageService {
                     generatedTitle: uniqueSlug,
                     owner: user,
                     isFree: dto.isFree,
+                    shareableUrl: shareableURL
                 });
                 return await manager.save(WaitingPageEntity, waitingPage);
             },
@@ -119,7 +121,7 @@ export class WaitingPageService {
             throw new Error(`Waiting page with title '${title}' not found`);
         }
         const shareableUrl = this.generateShareablePageURL(title)
-        return GetWaitingPageResponseDTO.fromEntity(waitingPage,shareableUrl);
+        return GetWaitingPageResponseDTO.fromEntity(waitingPage);
     }
 
     async getAllWaitingPages(user: UserEntity): Promise<GetWaitingPageResponseDTO[]> {
@@ -128,17 +130,19 @@ export class WaitingPageService {
             order: { id: 'DESC' },
         });
         return waitingPages.map(page => {
-            const shareableURL = this.generateShareablePageURL(page.generatedTitle);
-            return GetWaitingPageResponseDTO.fromEntity(page, shareableURL);
+            return GetWaitingPageResponseDTO.fromEntity(page);
         });
     }
 
-     generateShareablePageURL(uniqueTitle: string): string {
-        const frontendBaseUrl = this.configService.get<string>('FRONT_END_URL');
-        if (!frontendBaseUrl) {
-            throw new Error('FRONTEND_BASE_URL is not defined in environment variables.');
-        }
 
-        return `${frontendBaseUrl}/waiting-page/${uniqueTitle}`;
+    async generateShareablePageURL(uniqueTitle: string): Promise<string> {
+    const frontendBaseUrl = this.configService.get<string>('FRONT_END_URL');
+    if (!frontendBaseUrl) {
+        throw new Error('FRONTEND_BASE_URL is not defined in environment variables.');
     }
+
+    return `${frontendBaseUrl}/waiting-page/${uniqueTitle}`;
 }
+   
+}
+

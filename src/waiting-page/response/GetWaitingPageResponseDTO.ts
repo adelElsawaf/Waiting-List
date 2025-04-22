@@ -7,18 +7,25 @@ export default class GetWaitingPageResponseDTO {
     subTitle: string;
     backgroundImageUrl: string;
     generatedTitle: string;
-    shareableURL : string;
+    shareableURL: string;
     form?: GetDynamicFormResponse;
+    isFree: Boolean
 
-    static fromEntity(entity:WaitingPageEntity, shareableURL: string): GetWaitingPageResponseDTO {
+    static fromEntity(entity: WaitingPageEntity): GetWaitingPageResponseDTO {
         return {
             id: entity.id,
             title: entity.title,
             subTitle: entity.subTitle,
             backgroundImageUrl: entity.backgroundImgUrl,
             generatedTitle: entity.generatedTitle,
-            shareableURL: shareableURL,
+            shareableURL: entity.shareableUrl,
             form: entity.form ? GetDynamicFormResponse.fromEntity(entity.form) : null,
+            isFree:entity.isFree,
         };
+    }
+
+    static fromEntities(entities: WaitingPageEntity[]): GetWaitingPageResponseDTO[] {
+        console.log(entities)
+        return entities.map(entity => GetWaitingPageResponseDTO.fromEntity(entity));
     }
 }

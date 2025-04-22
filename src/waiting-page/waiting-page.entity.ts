@@ -33,4 +33,7 @@ export class WaitingPageEntity {
     
     @Column()
     isFree:Boolean
+
+    @Column()
+    shareableUrl: string
 }

@@ -9,6 +9,7 @@ import { UserNotFoundException } from './exception/UserNotFoundException';
 import { FindUserResponse } from './response/FindUserResponse';
 import { User } from './response/User';
 import { AuthService } from 'src/auth/auth.service';
+import GetWaitingPageResponseDTO from 'src/waiting-page/response/GetWaitingPageResponseDTO';
 
 @Injectable()
 export class UserService {
@@ -84,7 +85,10 @@ export class UserService {
 
     async findByEmail(email: string): Promise<FindUserResponse> {
 
-        const foundUser = await this.userRepository.findOne({ where: { email } })
+        const foundUser = await this.userRepository.findOne({
+            where: { email },
+            relations: ["waitingPages"]
+        })     
         if (!foundUser)
             throw new UserNotFoundException(`No User with email ${email} is found`)
 
@@ -94,8 +98,13 @@ export class UserService {
         return response;
     }
      async findByEmailSafe(email: string): Promise<FindUserResponse | null> {
-      
-        const foundUser = await this.userRepository.findOne({ where: { email } })
+        console.log(email)
+        const foundUser = await this.userRepository.findOne({ 
+            where: { email },
+            relations: ["waitingPages"]
+        })
+        console.log("X")
+        console.log(foundUser)
         if (!foundUser) {
             return null; 
         }
@@ -114,6 +123,7 @@ export class UserService {
             lastName: userAsEntity.lastName,
             googleId: userAsEntity.googleId,
             credits: userAsEntity.credits,
+            waitingPages : userAsEntity.waitingPages ? GetWaitingPageResponseDTO.fromEntities(userAsEntity.waitingPages) : null
         }
         return user
     }

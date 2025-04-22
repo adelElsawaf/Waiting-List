@@ -98,13 +98,11 @@ export class UserService {
         return response;
     }
      async findByEmailSafe(email: string): Promise<FindUserResponse | null> {
-        console.log(email)
         const foundUser = await this.userRepository.findOne({ 
             where: { email },
             relations: ["waitingPages"]
         })
-        console.log("X")
-        console.log(foundUser)
+
         if (!foundUser) {
             return null; 
         }

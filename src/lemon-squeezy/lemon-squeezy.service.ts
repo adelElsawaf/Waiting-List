@@ -97,7 +97,6 @@ export class LemonSqueezyService {
         rawBody: Buffer,
     ): Promise<WebhookResponse> {
         console.log('Received webhook:', JSON.stringify(webhookRequest, null, 2));
-        console.log('Received signature:', signature);
 
         const signingSecret = this.configService.get<string>('LEMONSQUEEZY_SIGNING_SECRET');
         if (!signingSecret) {
@@ -111,7 +110,6 @@ export class LemonSqueezyService {
             .digest('hex');
 
 
-        console.log('Computed HMAC:', hmac);
 
         if (hmac !== signature) {
             console.error('Invalid webhook signature. Expected:', hmac, 'Received:', signature);
@@ -119,7 +117,6 @@ export class LemonSqueezyService {
         }
 
         const eventName = webhookRequest.meta.event_name;
-        console.log('Webhook event:', eventName);
 
         if (eventName === 'order_created') {
             const customData = webhookRequest.meta.custom_data;

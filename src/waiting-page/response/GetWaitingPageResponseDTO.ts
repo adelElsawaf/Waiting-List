@@ -25,7 +25,6 @@ export default class GetWaitingPageResponseDTO {
     }
 
     static fromEntities(entities: WaitingPageEntity[]): GetWaitingPageResponseDTO[] {
-        console.log(entities)
         return entities.map(entity => GetWaitingPageResponseDTO.fromEntity(entity));
     }
 }

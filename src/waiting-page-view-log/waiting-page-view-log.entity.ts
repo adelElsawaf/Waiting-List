@@ -1,6 +1,6 @@
 import { WaitingPageEntity } from "src/waiting-page/waiting-page.entity";
 import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-@Index('waiting_page_view_idx', ['waitingPage', 'userIpAddress'])
+@Index('waiting_page_view_idx', ['waitingPage', 'visitorId'])
 @Entity('waiting_page_view_logs')
 export default class WaitingPageViewLogEntity {
     @PrimaryGeneratedColumn()
@@ -11,7 +11,7 @@ export default class WaitingPageViewLogEntity {
     waitingPage: WaitingPageEntity;
     
     @Column()
-    userIpAddress:string
+    visitorId:string
     
     @CreateDateColumn()
     viewedAt:Date

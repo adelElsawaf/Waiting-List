@@ -7,13 +7,12 @@ export class CreateViewLogRequest {
     waitingPageId: number;
 
     @IsNotEmpty({ message: 'userIpAddress must not be empty' })
-    @IsIP(undefined, { message: 'userIpAddress must be a valid IP address' })
-    userIpAddress: string;
+    visitorId: string;
 
     toEntity(waitingPage: any): WaitingPageViewLogsEntity {
         const viewLog = new WaitingPageViewLogsEntity();
         viewLog.waitingPage = waitingPage;
-        viewLog.userIpAddress = this.userIpAddress;
+        viewLog.visitorId = this.visitorId;
         return viewLog;
     }
 }

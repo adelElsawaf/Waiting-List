@@ -24,7 +24,7 @@ export class WaitingPageViewLogService {
     async getNumberOfUniqueViewersForPage(waitingPageId: number): Promise<number> {
         const result = await this.waitingPageViewLogRepository
             .createQueryBuilder('log')
-            .select('COUNT(DISTINCT log.userIpAddress)', 'count')
+            .select('COUNT(DISTINCT log.visitorId)', 'count')
             .where('log.waitingPageId = :waitingPageId', { waitingPageId })
             .getRawOne();
 

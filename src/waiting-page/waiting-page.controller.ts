@@ -36,7 +36,7 @@ export class WaitingPageController {
     @Get(":uniqueTitle")
     async getWaitingPage(
         @LoggedInUser() user:UserEntity,
-        @Param("uniqueTitle") uniqueTitle: string): Promise<GetWaitingPageResponseDTO> {
+        @Param("uniqueTitle") uniqueTitle: string) : Promise<GetWaitingPageResponseDTO> {
         return this.waitingPageService.getWaitingPageByUniqueTitle(uniqueTitle,user);
     }
 

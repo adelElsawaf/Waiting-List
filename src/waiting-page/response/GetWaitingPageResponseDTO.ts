@@ -8,7 +8,7 @@ export default class GetWaitingPageResponseDTO {
     backgroundImageUrl: string;
     generatedTitle: string;
     shareableURL: string;
-    form?: GetDynamicFormResponse;
+    forms?: GetDynamicFormResponse[];
     isFree: Boolean
 
     static fromEntity(entity: WaitingPageEntity): GetWaitingPageResponseDTO {
@@ -19,7 +19,7 @@ export default class GetWaitingPageResponseDTO {
             backgroundImageUrl: entity.backgroundImgUrl,
             generatedTitle: entity.generatedTitle,
             shareableURL: entity.shareableUrl,
-            form: entity.form ? GetDynamicFormResponse.fromEntity(entity.form) : null,
+            forms: entity.forms ? GetDynamicFormResponse.fromEntities(entity.forms) : null,
             isFree:entity.isFree,
         };
     }

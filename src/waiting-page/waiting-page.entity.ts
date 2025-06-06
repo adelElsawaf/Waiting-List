@@ -25,8 +25,8 @@ export class WaitingPageEntity {
     owner: UserEntity;
 
 
-    @OneToOne(() => DynamicFormEntity, (form) => form.waitingPage)
-    form: DynamicFormEntity;
+    @OneToMany(() => DynamicFormEntity, (form) => form.waitingPage)
+    forms: DynamicFormEntity[];
 
     @OneToMany(() => WaitingPageViewDataEntity, (viewData) => viewData.waitingPage)
     views: WaitingPageViewDataEntity[];

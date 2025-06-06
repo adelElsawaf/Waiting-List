@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { DynamicFormService } from './dynamic-form.service';
 import { CreateDynamicFormRequest } from './request/CreateDynamicFormRequest';
 import { DynamicFormEntity } from './dynamic-form.entity';
@@ -19,6 +19,12 @@ export class DynamicFormController {
         @Body() createDto: CreateDynamicFormRequest): Promise<CreateDynamicFormResponse> {
         return this.dynamicFormService.createForm(createDto, user);
     }
-
+    @Put()
+    @UseGuards(JwtAuthGuard)
+    async updateDynamicForm(
+        @LoggedInUser() user: UserEntity,
+        @Body() createDto: CreateDynamicFormRequest): Promise<CreateDynamicFormResponse> {
+        return this.dynamicFormService.createForm(createDto, user);
+    }
 
 }

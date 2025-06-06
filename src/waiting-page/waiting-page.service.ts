@@ -84,7 +84,7 @@ export class WaitingPageService {
     async getWaitingPageByIdAsEntity(id: number): Promise<WaitingPageEntity> {
         return await this.waitingPageRepository.findOne({
             where: { id },
-            relations: ['owner'], // ✅ This will load the owner
+            relations: ['owner','forms'], // ✅ This will load the owner
         });
     }
 
@@ -99,20 +99,20 @@ export class WaitingPageService {
             waitingPage = await this.waitingPageRepository.findOne({
                 where: { generatedTitle: title, owner: loggedInUser },
                 relations: [
-                    "form",
-                    "form.fields",
-                    "form.submissions",
-                    "form.submissions.answers",
-                    "form.submissions.answers.field",
+                    "forms",
+                    "forms.fields",
+                    "forms.submissions",
+                    "forms.submissions.answers",
+                    "forms.submissions.answers.field",
                 ],
             });
         } else {
             // 🔹 Fetch without owner filter for non-logged-in users
             waitingPage = await this.waitingPageRepository.findOne({
-                where: { generatedTitle: title },
+                where: { generatedTitle: title ,forms: { isActive: true }},
                 relations: [
-                    "form",
-                    "form.fields",
+                    "forms",
+                    "forms.fields",
                 ]
             });
         }
@@ -120,7 +120,6 @@ export class WaitingPageService {
         if (!waitingPage) {
             throw new Error(`Waiting page with title '${title}' not found`);
         }
-        const shareableUrl = this.generateShareablePageURL(title)
         return GetWaitingPageResponseDTO.fromEntity(waitingPage);
     }
 

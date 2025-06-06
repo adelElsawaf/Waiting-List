@@ -7,7 +7,6 @@ import { FieldService } from 'src/field/field.service';
 import { CreateDynamicFormRequest } from './request/CreateDynamicFormRequest';
 import { CreateDynamicFormResponse } from './response/CreateDynamicFormResponse';
 import { UserEntity } from 'src/user/user.entity';
-import { FieldAnswerService } from 'src/field-answer/field-answer.service';
 import { FormNotFoundException } from './exception/FormNotFoundException';
 import { FormHasNoFieldsException } from './exception/FormHasNoFieldsException';
 
@@ -18,7 +17,6 @@ export class DynamicFormService {
         private readonly dynamicFormRepository: Repository<DynamicFormEntity>,
         private readonly waitingPageService: WaitingPageService,
         private readonly fieldService: FieldService,
-        private readonly fieldAnswerService: FieldAnswerService,
         @InjectEntityManager()
         private readonly entityManager: EntityManager,
     ) { }
@@ -29,6 +27,8 @@ export class DynamicFormService {
             if (loggedInUser.id !== waitingPage.owner.id)
                 throw new UnauthorizedException('You are not the owner of the page');
             const form = transactionalEntityManager.create(DynamicFormEntity, { waitingPage });
+            await this.deactivateFormActiveVersion(waitingPage.id);
+            form.isActive = true;
             const savedForm = await transactionalEntityManager.save(form);
             const fieldsWithFormId = [
                 ...createDto.fields.map((field) => ({
@@ -46,6 +46,25 @@ export class DynamicFormService {
         });
     }
 
+    async activateFormActiveVersion(waitingPageId: number , formId: number) {
+        await this.deactivateFormActiveVersion(waitingPageId);
+        const targetForm = await this.getFormAsEntityById(formId);
+        targetForm.isActive = true;
+        return await this.dynamicFormRepository.save(targetForm);
+    }
+
+    async deactivateFormActiveVersion(waitingPageId: number) {
+        const activeForm = await this.getFormActiveVersion(waitingPageId);
+        if (!activeForm) return;
+        activeForm.isActive = false;
+        return await this.dynamicFormRepository.save(activeForm);
+    }
+    async getFormActiveVersion(waitingPageId: number) {
+        return await this.dynamicFormRepository.findOne({
+            where: { waitingPage: { id: waitingPageId }, isActive: true },
+        });
+    }
+
 
     async getFormFields(formId: number) {
         const form = await this.dynamicFormRepository.findOne({
@@ -53,7 +72,7 @@ export class DynamicFormService {
             relations: ['fields'],
         });
         if (!form) throw new NotFoundException('Form not found');
-        if(!form.fields.length) throw new FormHasNoFieldsException(formId);
+        if (!form.fields.length) throw new FormHasNoFieldsException(formId);
         return form.fields;
     }
 

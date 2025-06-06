@@ -15,4 +15,7 @@ export default class GetDynamicFormResponse {
             submissions: entity.submissions ?  GetFormSubmissionResponse.fromEntities(entity.submissions) : null
         };
     }
+    static fromEntities(entities): GetDynamicFormResponse[] {
+        return entities.map(entity=> GetDynamicFormResponse.fromEntity(entity));
+    }
 }

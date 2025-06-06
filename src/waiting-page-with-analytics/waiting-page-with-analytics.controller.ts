@@ -12,10 +12,10 @@ export class WaitingPageWithAnalyticsController {
         private readonly waitingPageWithAnalyticsService: WaitingPageWithAnalyticsService,
     ) {}
 
-    @UseGuards(JwtAuthGuard)
+   /* @UseGuards(JwtAuthGuard)
         @Get(":uniqueTitle")
     async getWaitingPageWithAnalytics(
         @Param("uniqueTitle") uniqueTitle: string,@LoggedInUser() user:UserEntity): Promise<GetWaitingPageWithAnalyticsResponse> {
         return this.waitingPageWithAnalyticsService.getWaitingPageWithAnalytics(uniqueTitle,user);
-    }
+    }*/
 }

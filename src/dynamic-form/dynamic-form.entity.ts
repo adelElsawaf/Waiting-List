@@ -1,14 +1,14 @@
 import { FieldEntity } from 'src/field/field.entity';
 import { FormSubmissionEntity } from 'src/form-submission/form-submission.entity';
 import { WaitingPageEntity } from 'src/waiting-page/waiting-page.entity';
-import { Entity, PrimaryGeneratedColumn, OneToMany, OneToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, OneToMany, OneToOne, JoinColumn, Column, ManyToOne } from 'typeorm';
 
 @Entity('dynamic_forms')
 export class DynamicFormEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @OneToOne(() => WaitingPageEntity, (waitingPage) => waitingPage.form, { onDelete: 'CASCADE' })
+    @ManyToOne(() => WaitingPageEntity, (waitingPage) => waitingPage.forms, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'waitingPageId' })
     waitingPage: WaitingPageEntity;
 
@@ -18,4 +18,7 @@ export class DynamicFormEntity {
 
     @OneToMany(() => FieldEntity, (field) => field.form)
     fields: FieldEntity[];
+
+    @Column({ default: false  , nullable: true} )
+    isActive: boolean;
 }

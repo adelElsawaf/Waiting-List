@@ -13,16 +13,16 @@ export class WaitingPageWithAnalyticsService {
         private readonly waitingPageViewLogService: WaitingPageViewLogService,
         private readonly formSubmissionService : FormSubmissionService
     ){}
-    async getWaitingPageWithAnalytics(uniqueTitle: string, loggedInUser: UserEntity): Promise<GetWaitingPageWithAnalyticsResponse> {
-        let numberOfSubmissions = 0
-        const waitingPage = await this.waitingPageService.getWaitingPageByUniqueTitle(uniqueTitle,loggedInUser);
-        const numberOfUniqueViewers = await this.waitingPageViewLogService.getNumberOfUniqueViewersForPage(waitingPage.id)
-        if(waitingPage.form){
-        numberOfSubmissions =  await this.formSubmissionService.getFormSubmissionCount(waitingPage.form.id);
-        }
-        return GetWaitingPageWithAnalyticsResponse.fromEntity(waitingPage, numberOfUniqueViewers, numberOfSubmissions);
+    // async getWaitingPageWithAnalytics(uniqueTitle: string, loggedInUser: UserEntity): Promise<GetWaitingPageWithAnalyticsResponse> {
+    //     let numberOfSubmissions = 0
+    //     const waitingPage = await this.waitingPageService.getWaitingPageByUniqueTitle(uniqueTitle,loggedInUser);
+    //     const numberOfUniqueViewers = await this.waitingPageViewLogService.getNumberOfUniqueViewersForPage(waitingPage.id)
+    //     if(waitingPage.form){
+    //     numberOfSubmissions =  await this.formSubmissionService.getFormSubmissionCount(waitingPage.form.id);
+    //     }
+    //     return GetWaitingPageWithAnalyticsResponse.fromEntity(waitingPage, numberOfUniqueViewers, numberOfSubmissions);
 
-    }
+    // }
 
 
 }

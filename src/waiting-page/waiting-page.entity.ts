@@ -1,6 +1,5 @@
 import { DynamicFormEntity } from "src/dynamic-form/dynamic-form.entity";
 import { UserEntity } from "src/user/user.entity";
-import WaitingPageViewDataEntity from "src/waiting-page-view-log/waiting-page-view-log.entity";
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn, JoinColumn, OneToOne, OneToMany } from "typeorm";
 
 @Entity("waiting_pages")
@@ -17,7 +16,7 @@ export class WaitingPageEntity {
     @Column()
     backgroundImgUrl: string;
 
-    @Column({ unique: true, nullable: false })
+    @Column({unique: true, nullable: false })
     generatedTitle: string;
 
     @ManyToOne(() => UserEntity, (user) => user.waitingPages, { onDelete: 'CASCADE' })
@@ -28,11 +27,8 @@ export class WaitingPageEntity {
     @OneToMany(() => DynamicFormEntity, (form) => form.waitingPage)
     forms: DynamicFormEntity[];
 
-    @OneToMany(() => WaitingPageViewDataEntity, (viewData) => viewData.waitingPage)
-    views: WaitingPageViewDataEntity[];
-    
     @Column()
-    isFree:Boolean
+    isFree: Boolean
 
     @Column()
     shareableUrl: string

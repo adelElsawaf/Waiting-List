@@ -1,5 +1,6 @@
 import { FieldEntity } from 'src/field/field.entity';
 import { FormSubmissionEntity } from 'src/form-submission/form-submission.entity';
+import { FormViewLogEntity } from 'src/form-view-logs/form-view-logs.entity';
 import { WaitingPageEntity } from 'src/waiting-page/waiting-page.entity';
 import { Entity, PrimaryGeneratedColumn, OneToMany, OneToOne, JoinColumn, Column, ManyToOne } from 'typeorm';
 
@@ -19,6 +20,11 @@ export class DynamicFormEntity {
     @OneToMany(() => FieldEntity, (field) => field.form)
     fields: FieldEntity[];
 
+    @OneToMany(() => FormViewLogEntity, (viewLog) => viewLog.form)
+    viewLogs: FormViewLogEntity[];
+
     @Column({ default: false  , nullable: true} )
     isActive: boolean;
+
+
 }

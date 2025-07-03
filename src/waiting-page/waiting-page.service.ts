@@ -18,15 +18,15 @@ export class WaitingPageService {
     private pageCost;
     constructor(
         @InjectRepository(WaitingPageEntity)
-        private readonly waitingPageRepository :Repository<WaitingPageEntity>,
+        private readonly waitingPageRepository: Repository<WaitingPageEntity>,
         private readonly configService: ConfigService,
         private readonly userService: UserService,
-        private  dropboxStorageService: DropboxStorageService,
+        private dropboxStorageService: DropboxStorageService,
         private readonly dataSource: DataSource,
-    ) { 
+    ) {
         this.pageCost = this.configService.get<number>('PAGE_COST');
     }
-    
+
     async createWaitingPage(
         user: UserEntity,
         dto: CreateWaitingPageDto,
@@ -36,7 +36,7 @@ export class WaitingPageService {
         if (dto.isFree && userWaitingPages.length >= 5) {
             throw new BadRequestException('User already has 5 free waiting pages');
         }
-        if(!dto.isFree && user.credits < this.pageCost) {
+        if (!dto.isFree && user.credits < this.pageCost) {
             throw new UnprocessableEntityException('User does not have enough credits');
         }
 
@@ -71,7 +71,7 @@ export class WaitingPageService {
 
     async getUserFreeWaitingPages(user: UserEntity): Promise<WaitingPageEntity[]> {
         return this.waitingPageRepository.find({
-            where: { owner: { id: user.id } , isFree: true },
+            where: { owner: { id: user.id }, isFree: true },
             order: { id: 'DESC' },
         });
     }
@@ -84,38 +84,40 @@ export class WaitingPageService {
     async getWaitingPageByIdAsEntity(id: number): Promise<WaitingPageEntity> {
         return await this.waitingPageRepository.findOne({
             where: { id },
-            relations: ['owner','forms'], // ✅ This will load the owner
+            relations: ['owner', 'forms'], // ✅ This will load the owner
         });
     }
 
     async getWaitingPageByUniqueTitle(title: string,
         loggedInUser?: UserEntity,
-       
     ): Promise<GetWaitingPageResponseDTO> {
         let waitingPage: WaitingPageEntity | null = null;
         if (loggedInUser) {
-            // 🔹 Define behavior for logged-in users
-            // Example: Fetch waiting page only if user is the owner
-            waitingPage = await this.waitingPageRepository.findOne({
-                where: { generatedTitle: title, owner: loggedInUser },
-                relations: [
-                    "forms",
-                    "forms.fields",
-                    "forms.submissions",
-                    "forms.submissions.answers",
-                    "forms.submissions.answers.field",
-                ],
-            });
-        } else {
+            // 🔹 Fetch waiting page with forms ordered by ID
+            waitingPage = await this.waitingPageRepository
+                .createQueryBuilder('waitingPage')
+                .leftJoinAndSelect('waitingPage.forms', 'form')
+                .leftJoinAndSelect('form.fields', 'field')
+                .leftJoinAndSelect('form.submissions', 'submission')
+                .leftJoinAndSelect('submission.answers', 'answer')
+                .leftJoinAndSelect('answer.field', 'answerField')
+                .where('waitingPage.generatedTitle = :title', { title })
+                .andWhere('waitingPage.ownerId = :ownerId', { ownerId: loggedInUser.id })
+                .orderBy('form.id', 'ASC')
+                .getOne();
+        }
+        else {
             // 🔹 Fetch without owner filter for non-logged-in users
             waitingPage = await this.waitingPageRepository.findOne({
-                where: { generatedTitle: title ,forms: { isActive: true }},
+                where: { generatedTitle: title, forms: { isActive: true } },
                 relations: [
                     "forms",
                     "forms.fields",
                 ]
             });
+            console.log(waitingPage)
         }
+
 
         if (!waitingPage) {
             throw new Error(`Waiting page with title '${title}' not found`);
@@ -135,13 +137,13 @@ export class WaitingPageService {
 
 
     async generateShareablePageURL(uniqueTitle: string): Promise<string> {
-    const frontendBaseUrl = this.configService.get<string>('FRONT_END_URL');
-    if (!frontendBaseUrl) {
-        throw new Error('FRONTEND_BASE_URL is not defined in environment variables.');
+        const frontendBaseUrl = this.configService.get<string>('FRONT_END_URL');
+        if (!frontendBaseUrl) {
+            throw new Error('FRONTEND_BASE_URL is not defined in environment variables.');
+        }
+
+        return `${frontendBaseUrl}/waiting-page/${uniqueTitle}`;
     }
 
-    return `${frontendBaseUrl}/waiting-page/${uniqueTitle}`;
-}
-   
 }
 

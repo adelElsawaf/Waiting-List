@@ -30,6 +30,7 @@ export class LemonSqueezyController {
     ): Promise<WebhookResponse> {
         const rawBody = (req as any).body; // Buffer
         const parsedBody = JSON.parse(rawBody.toString()); // You still need parsed data for logic
+        console.log(rawBody)
         return this.lemonSqueezyService.handleWebhook(parsedBody, signature, rawBody);
     }
 

@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { DynamicFormService } from './dynamic-form.service';
 import { CreateDynamicFormRequest } from './request/CreateDynamicFormRequest';
 import { DynamicFormEntity } from './dynamic-form.entity';
@@ -27,4 +27,14 @@ export class DynamicFormController {
         return this.dynamicFormService.createForm(createDto, user);
     }
 
+    @Get('/:formId/total-views')
+    async getFormTotalViewes(@Param('formId') formId: number) {
+        return {totalViews: await this.dynamicFormService.getFormTotalViewes( formId)};
+    }
+
+    @Put('/:formId/waiting-page/:waitingPageId/activate')
+    @UseGuards(JwtAuthGuard)
+    async activateForm(@LoggedInUser() user: UserEntity, @Param('waitingPageId') waitingPageId: number, @Param('formId') formId: number) {
+        return this.dynamicFormService.activateFormActiveVersion(waitingPageId, formId);
+    }
 }

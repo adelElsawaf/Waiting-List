@@ -1,6 +1,5 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -13,11 +12,10 @@ import { DynamicFormModule } from './dynamic-form/dynamic-form.module';
 import { FieldModule } from './field/field.module';
 import { FieldAnswerModule } from './field-answer/field-answer.module';
 import { FormSubmissionModule } from './form-submission/form-submission.module';
-import { WaitingPageViewLogModule } from './waiting-page-view-log/waiting-page-view-log.module';
-import { WaitingPageWithAnalyticsModule } from './waiting-page-with-analytics/waiting-page-with-analytics.module';
 import { LemonSqueezyService } from './lemon-squeezy/lemon-squeezy.service';
 import { LemonSqueezyController } from './lemon-squeezy/lemon-squeezy.controller';
 import { LemonSqueezyModule } from './lemon-squeezy/lemon-squeezy.module';
+import { FormViewLogsModule } from './form-view-logs/form-view-logs.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -46,9 +44,8 @@ import { LemonSqueezyModule } from './lemon-squeezy/lemon-squeezy.module';
     FieldModule,
     FieldAnswerModule,
     FormSubmissionModule,
-    WaitingPageViewLogModule,
-    WaitingPageWithAnalyticsModule,
     LemonSqueezyModule,
+    FormViewLogsModule,
   ],
   controllers: [AppController, LemonSqueezyController],
   providers: [AppService, LemonSqueezyService],

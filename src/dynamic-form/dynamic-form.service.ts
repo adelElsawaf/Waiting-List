@@ -9,6 +9,7 @@ import { CreateDynamicFormResponse } from './response/CreateDynamicFormResponse'
 import { UserEntity } from 'src/user/user.entity';
 import { FormNotFoundException } from './exception/FormNotFoundException';
 import { FormHasNoFieldsException } from './exception/FormHasNoFieldsException';
+import { FormViewLogsService } from 'src/form-view-logs/form-view-logs.service';
 
 @Injectable()
 export class DynamicFormService {
@@ -17,35 +18,60 @@ export class DynamicFormService {
         private readonly dynamicFormRepository: Repository<DynamicFormEntity>,
         private readonly waitingPageService: WaitingPageService,
         private readonly fieldService: FieldService,
+        private readonly formViewLogsService : FormViewLogsService,
         @InjectEntityManager()
         private readonly entityManager: EntityManager,
     ) { }
-    async createForm(createDto: CreateDynamicFormRequest, loggedInUser: UserEntity): Promise<CreateDynamicFormResponse> {
+    async createForm(
+        createDto: CreateDynamicFormRequest,
+        loggedInUser: UserEntity
+    ): Promise<CreateDynamicFormResponse> {
         return await this.entityManager.transaction(async (transactionalEntityManager) => {
             const waitingPage = await this.waitingPageService.getWaitingPageByIdAsEntity(createDto.waitingPageId);
-            if (!waitingPage) throw new NotFoundException('Waiting Page not found');
-            if (loggedInUser.id !== waitingPage.owner.id)
+
+            if (!waitingPage) {
+                throw new NotFoundException('Waiting Page not found');
+            }
+
+            if (loggedInUser.id !== waitingPage.owner.id) {
                 throw new UnauthorizedException('You are not the owner of the page');
+            }
+            if(waitingPage.forms.length >= 5) {
+                throw new UnauthorizedException('Waiting page already has 5 forms');
+            }
+
+            // Create new form entity linked to waitingPage
             const form = transactionalEntityManager.create(DynamicFormEntity, { waitingPage });
+
+            // Deactivate any active form version
             await this.deactivateFormActiveVersion(waitingPage.id);
+
             form.isActive = true;
+
             const savedForm = await transactionalEntityManager.save(form);
-            const fieldsWithFormId = [
-                ...createDto.fields.map((field) => ({
+
+            // Prepare fields: add seed data only if no forms exist on the waiting page
+            let fieldsWithFormId = createDto.fields.map((field) => ({
+                ...field,
+                form: savedForm,
+            }));
+
+            if (waitingPage.forms.length === 0) {
+                const seedFields = this.fieldService.getSeedData().map((field) => ({
                     ...field,
                     form: savedForm,
-                })),
-                ...this.fieldService.getSeedData().map((field) => ({
-                    ...field,
-                    form: savedForm,
-                })),
-            ];
+                }));
+                fieldsWithFormId = [...fieldsWithFormId, ...seedFields];
+            }
+
             const fields = await this.fieldService.createListOfFields(fieldsWithFormId, transactionalEntityManager);
+
             const dynamicFormWithFields = { ...savedForm, fields };
+
             return CreateDynamicFormResponse.fromEntity(dynamicFormWithFields);
         });
     }
-
+      
     async activateFormActiveVersion(waitingPageId: number , formId: number) {
         await this.deactivateFormActiveVersion(waitingPageId);
         const targetForm = await this.getFormAsEntityById(formId);
@@ -84,6 +110,7 @@ export class DynamicFormService {
         return form;
     }
 
-
-
+    async getFormTotalViewes(formId: number) {
+        return await this.formViewLogsService.countUniqueViews(formId);
+    }
 }

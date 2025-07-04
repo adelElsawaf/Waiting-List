@@ -13,4 +13,8 @@ export class CreateFieldRequest {
 
     @IsEnum(FieldTypeEnum)
     type: FieldTypeEnum;
+
+    @IsBoolean()
+    @IsOptional()
+    isSeeded:boolean;
 }

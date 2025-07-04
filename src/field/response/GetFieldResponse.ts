@@ -8,6 +8,7 @@ export default class GetFieldResponse {
     isMandatory: boolean;
     type: string;
     answers?:GetFieldAnswerResponse[]
+    isSeeded?:boolean
 
     static fromEntity(entity): GetFieldResponse {
         return {
@@ -16,7 +17,8 @@ export default class GetFieldResponse {
             placeholder: entity.placeholder,
             isMandatory: entity.isMandatory,
             type: entity.type,
-            answers:entity.answers
+            answers:entity.answers,
+            isSeeded:entity.isSeeded
         };
     }
 

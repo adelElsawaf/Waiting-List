@@ -41,6 +41,7 @@ export class WaitingPageController {
 
     @Get()
     @UseGuards(JwtAuthGuard)
+
     async getAllWaitingPages(
         @LoggedInUser() user: UserEntity): Promise<GetWaitingPageResponseDTO[]> {
         return this.waitingPageService.getAllWaitingPages(user);

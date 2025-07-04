@@ -41,6 +41,7 @@ export class FieldService {
                 type: FieldTypeEnum.EMAIL,
                 placeholder: 'Enter your Email',
                 isMandatory: true,
+                isSeeded: true
             }
         ]
     }

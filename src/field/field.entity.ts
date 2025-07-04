@@ -26,4 +26,7 @@ export class FieldEntity {
 
     @OneToMany(() => FieldAnswerEntity, (answer) => answer.field, { cascade: true })
     answers: FieldAnswerEntity[];
+
+    @Column({ default: false })
+    isSeeded: boolean;
 }
